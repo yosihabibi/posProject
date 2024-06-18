@@ -1,0 +1,229 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-center">Image Library</h2>
+    <div class="d-flex justify-content-end">
+        <button type="button" class="btn btn-primary mb-3" id="renameFoldersBtn">Rename Folders</button>
+    </div>
+    <ul class="nav nav-tabs justify-content-center" id="libraryTab" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="tab1-tab" data-toggle="tab" href="#tab1" role="tab" aria-controls="tab1" aria-selected="true">Organised Faces</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="tab2-tab" data-toggle="tab" href="#tab2" role="tab" aria-controls="tab2" aria-selected="false">Tab 2</a>
+        </li>
+    </ul>
+    <div class="tab-content" id="libraryTabContent">
+        <div class="tab-pane fade show active" id="tab1" role="tabpanel" aria-labelledby="tab1-tab">
+            <div class="row mt-3">
+                {% for directory in directories_tab1 %}
+                    <div class="col-md-4">
+                        <div class="card mb-4 shadow-sm">
+                            <div class="img-container">
+                                <img src="{{ directory.first_image }}" class="img-cover img-square" alt="{{ directory.name }}">
+                            </div>
+                            <div class="card-body">
+                                <a href="{{ url_for('view_repository', repository=directory.name) }}">
+                                    <h5 class="card-title">{{ directory.name }}</h5>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+        <div class="tab-pane fade" id="tab2" role="tabpanel" aria-labelledby="tab2-tab">
+            <div class="row mt-3">
+                {% for directory in directories_tab2 %}
+                    <div class="col-md-4">
+                        <div class="card mb-4 shadow-sm">
+                            {% if directory.first_image %}
+                            <div class="img-container">
+                                <img src="{{ url_for('static', filename=directory.first_image) }}" class="card-img-top img-cover" alt="{{ directory.name }}">
+                            </div>                              
+                            {% endif %}
+                            <div class="card-body">
+                                <a href="{{ url_for('view_repository', repository=directory.name) }}">
+                                    <h5 class="card-title">{{ directory.name }}</h5>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div id="renameOverlay" class="overlay">
+    <div class="overlay-content">
+        <button type="button" class="close-overlay-btn" id="closeOverlayBtn">&times;</button>
+        <h5 class="overlay-title">Rename Folders</h5>
+        <form id="renameForm" method="POST" action="{{ url_for('rename_folders') }}">
+            <div id="renameGroupsContainer">
+                <!-- The rename groups will be dynamically added here -->
+            </div>
+        </form>
+        <button type="button" class="btn btn-secondary" id="prevFolderBtn">Previous</button>
+        <button type="button" class="btn btn-primary" id="nextFolderBtn">Next</button>
+        <button type="button" class="btn btn-success" id="saveChangesBtn">Save Changes</button>
+    </div>
+</div>
+
+<style>
+.card-title {
+    text-align: center;
+}
+
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 1000;
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.overlay-content {
+    background: white;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    position: relative;
+}
+
+.close-overlay-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.rename-img {
+    max-width: 500px;
+    max-height: 400px;
+    margin-bottom: 20px;
+}
+
+.rename-input {
+    margin-bottom: 20px;
+}
+
+.img-container {
+    width: 100%;
+    aspect-ratio: 1 / 1; /* Ensures the container itself is 1:1 */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.img-cover.img-square {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    -webkit-object-fit: cover;
+    -moz-object-fit: cover;
+    -o-object-fit: cover; 
+}
+</style>
+
+<script>
+document.getElementById('renameFoldersBtn').addEventListener('click', function() {
+    const activeTab = document.querySelector('.nav-link.active').getAttribute('href').substring(1);
+    loadRenameGroups(activeTab);
+    document.getElementById('renameOverlay').style.display = 'flex';
+});
+
+document.getElementById('closeOverlayBtn').addEventListener('click', function() {
+    document.getElementById('renameOverlay').style.display = 'none';
+});
+
+const renameGroupsContainer = document.getElementById('renameGroupsContainer');
+let currentGroup = 0;
+
+function loadRenameGroups(tab) {
+    renameGroupsContainer.innerHTML = '';
+    let directories = [];
+    if (tab === 'tab1') {
+        directories = {{ directories_tab1 | tojson }};
+    } else if (tab === 'tab2') {
+        directories = {{ directories_tab2 | tojson }};
+    }
+
+    directories.forEach((directory, index) => {
+        const groupDiv = document.createElement('div');
+        groupDiv.classList.add('rename-group');
+        groupDiv.id = `renameGroup-${index}`;
+        groupDiv.style.display = index === 0 ? 'block' : 'none';
+
+        if (directory.first_image) {
+            const img = document.createElement('img');
+            img.src = directory.first_image;
+            img.classList.add('rename-img');
+            img.alt = directory.name;
+            groupDiv.appendChild(img);
+        }
+
+        const input = document.createElement('input');
+        input.type = 'text';
+        input.classList.add('form-control', 'rename-input');
+        input.id = `newName-${index}`;
+        input.name = 'new_name[]';
+        input.placeholder = directory.name;
+        groupDiv.appendChild(input);
+
+        renameGroupsContainer.appendChild(groupDiv);
+    });
+
+    currentGroup = 0;
+    toggleButtons();
+}
+
+document.getElementById('nextFolderBtn').addEventListener('click', function() {
+    const groups = document.querySelectorAll('.rename-group');
+    if (currentGroup < groups.length - 1) {
+        groups[currentGroup].style.display = 'none';
+        currentGroup++;
+        groups[currentGroup].style.display = 'block';
+    }
+    toggleButtons();
+});
+
+document.getElementById('prevFolderBtn').addEventListener('click', function() {
+    const groups = document.querySelectorAll('.rename-group');
+    if (currentGroup > 0) {
+        groups[currentGroup].style.display = 'none';
+        currentGroup--;
+        groups[currentGroup].style.display = 'block';
+    }
+    toggleButtons();
+});
+
+function toggleButtons() {
+    const groups = document.querySelectorAll('.rename-group');
+    document.getElementById('prevFolderBtn').style.display = currentGroup > 0 ? 'inline-block' : 'none';
+    document.getElementById('nextFolderBtn').style.display = currentGroup < groups.length - 1 ? 'inline-block' : 'none';
+    document.getElementById('saveChangesBtn').style.display = 'inline-block';
+}
+
+document.getElementById('saveChangesBtn').addEventListener('click', function() {
+    document.getElementById('renameForm').submit();
+});
+
+document.addEventListener('click', function(event) {
+    if (!document.getElementById('renameOverlay').contains(event.target) && event.target.id !== 'renameFoldersBtn') {
+        document.getElementById('renameOverlay').style.display = 'none';
+    }
+});
+</script>
+{% endblock %}

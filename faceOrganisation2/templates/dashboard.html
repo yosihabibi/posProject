@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="welcome-div text-center mb-4">
+        <h1>Welcome {{ user_email.split('@')[0] }}!</h1>
+    </div>
+    <h2 class="text-center mb-4 mt-5">Choose your feature</h2>
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card-deck">
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body text-center">
+                        <a href="{{ url_for('upload_file') }}" class="feature-button">Organize Faces</a>
+                    </div>
+                </div>
+                <div class="card mb-4 shadow-sm">
+                    <div class="card-body text-center">
+                        <a href="#" class="feature-button">Another Feature</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
