@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Facify</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap">
+    <style>
+        footer {
+            color: #ffffff;
+            text-align: center;
+            padding: 35px 0;
+            margin-top: auto;
+        }
+        body, html {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            font-family: 'Bebas Neue', 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            text-align: center;
+        }
+        body {
+            overflow-y: auto;
+        }
+        .background-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+            background: url('https://cdn.pixabay.com/photo/2023/05/14/10/27/ai-generated-7992462_1280.jpg') no-repeat center center fixed;
+            background-size: cover;
+            filter: blur(8px);
+        }
+        .overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Dark overlay for better text readability */
+            z-index: -1;
+        }
+        .intro-section {
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding-top: 80px; /* space for navbar */
+            padding-bottom: 20px; /* avoid footer overlap */
+            z-index: 1;
+        }
+        .intro-content {
+            max-width: 600px;
+            padding: 20px;
+            margin: 55px;
+        }
+        .intro-section h1,
+        .intro-section p,
+        .navbar-nav .nav-link,
+        .get-started-btn {
+            text-transform: uppercase;
+        }
+        .intro-section h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+        }
+        .intro-section p {
+            margin-top: 40px;
+            font-size: 1.55rem;
+            margin-bottom: 30px;
+        }
+        .arrow {
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 300px solid #e6b800; /* Very long initial arrow */
+            margin: 0 auto;
+            transition: border-top-width 2s ease-out;
+        }
+        .arrow.scrolled {
+            border-top-width: 600px;
+        }
+        .logo-container {
+            margin: 20px 0;
+            overflow: hidden; /* Ensure it doesn't expand beyond its container */
+        }
+        .facify-logo {
+            margin-top: 140px;
+            margin-bottom: 35px;
+            width: 100%;
+            max-width: 400px;
+            opacity: 0;
+            transition: opacity 3s, transform 3s;
+        }
+        .facify-logo.visible {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .get-started-btn {
+            margin-top: 35px;
+            background-color: #ffcc00;
+            color: #003366;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+        }
+        .get-started-btn:hover {
+            background-color: #e6b800;
+            color: #002244;
+        }
+        .navbar {
+            background: transparent !important;
+            position: absolute;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+        }
+        .navbar-brand img {
+            height: 80px;
+        }
+        .navbar-nav .nav-link {
+            color: #ffffff !important;
+            margin-left: 15px;
+            font-weight: 500;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg">
+        <a class="navbar-brand" href="#">
+            <img src="{{ url_for('static', filename='images/facifyLogo.png') }}" alt="Facify Logo">
+        </a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item">
+                    <a class="btn get-started-btn" href="{{ url_for('login') }}">Get Started</a>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <div class="background-container"></div>
+    <div class="overlay"></div>
+    <div class="intro-section">
+        <div class="intro-content">
+            <h1>Welcome to Facify</h1>
+            <p>Step into a world where your memories are meticulously organized. Facify leverages advanced AI technology to bring order to your photo collections.</p>
+            <div class="arrow"></div> <!-- Arrow element added -->
+            <div class="logo-container">
+                <img src="{{ url_for('static', filename='images/facifyLogo.png') }}" class="facify-logo" alt="Facify Logo">
+            </div>
+            <p>Experience the ease of automatically recognizing and categorizing faces in your images. Join us today and transform your photo library into a seamlessly organized collection!</p>
+            <a class="btn get-started-btn" href="{{ url_for('login') }}">Get Started</a>
+        </div>
+    </div>
+    <footer>
+        &copy; 2024 Facify. All rights reserved.
+    </footer>
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        // JavaScript to handle the scroll effect
+        window.addEventListener('scroll', function() {
+            var scrollPosition = window.scrollY;
+            var arrow = document.querySelector('.arrow');
+            var logo = document.querySelector('.facify-logo');
+            var logoPosition = logo.getBoundingClientRect().top + window.scrollY;
+
+            // Check if logo is in view
+            if (scrollPosition + window.innerHeight > logoPosition + logo.offsetHeight / 2) {
+                logo.classList.add('visible');
+            } else {
+                logo.classList.remove('visible');
+            }
+
+            // Add or remove the 'scrolled' class based on scroll position
+            if (scrollPosition > 0) {
+                arrow.classList.add('scrolled');
+            } else {
+                arrow.classList.remove('scrolled');
+            }
+        });
+    </script>
+</body>
+</html>
